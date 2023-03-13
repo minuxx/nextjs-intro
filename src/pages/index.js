@@ -3,21 +3,12 @@ import NavBar from '@/components/NavBar'
 import { useEffect, useState } from 'react'
 import Seo from '@/components/Seo'
 
-export default function Home() {
-  const [movies, setMovies] = useState([])
-
-  useEffect(() => {
-    ;(async () => {
-      const { results } = await (await fetch(`api/movies`)).json()
-      setMovies(results)
-    })()
-  }, [])
-
+export default function Home({ results }) {
   return (
     <div className="container">
       <Seo title="Home" />
-      {!movies && <h4>Loading...</h4>}
-      {movies?.map((movie) => (
+
+      {results?.map((movie) => (
         <div className="movie" key={movie.id}>
           <img src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} />
           <h4>{movie.original_title}</h4>
@@ -46,4 +37,19 @@ export default function Home() {
       `}</style>
     </div>
   )
+}
+
+// 이 이름의 function 은 server쪽에서만 작동한다. 이것을 통해 redirect가 아니여도 API Key도 숨길 수 있다.
+// 이 함수는 props라는 키를 가진 object 를 반환하며 props 안에는 원하는 데이터를 아무거나 넣을 수 있다.
+// 그 데이터는 컴포넌트의 props 로 받게 된다. ( Custom App 의 pageProps 가 전달하게 된다. )
+export async function getServerSideProps() {
+  const { results } = await (
+    await fetch(`http://localhost:3004/api/movies`)
+  ).json()
+
+  return {
+    props: {
+      results,
+    },
+  }
 }
