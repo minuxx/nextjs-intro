@@ -2,16 +2,48 @@ import Head from 'next/head'
 import NavBar from '@/components/NavBar'
 import { useEffect, useState } from 'react'
 import Seo from '@/components/Seo'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 export default function Home({ results }) {
+  const router = useRouter()
+  const onClick = (id, title) => {
+    router.push(
+      {
+        pathname: `/movies/${id}`,
+        query: {
+          title,
+        },
+      },
+      `/movies/${id}`
+    )
+  }
+
   return (
     <div className="container">
       <Seo title="Home" />
 
       {results?.map((movie) => (
-        <div className="movie" key={movie.id}>
+        <div
+          onClick={() => onClick(movie.id, movie.original_title)}
+          key={movie.id}
+          className="movie"
+        >
           <img src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} />
-          <h4>{movie.original_title}</h4>
+          <h4>
+            <Link
+              href={{
+                pathname: `/movies/${movie.id}`,
+                query: {
+                  title: movie.original_title,
+                },
+              }}
+              as={`/movies/${movie.id}`}
+              legacyBehavior
+            >
+              <a>{movie.original_title}</a>
+            </Link>
+          </h4>
         </div>
       ))}
       <style jsx>{`
@@ -47,7 +79,7 @@ export default function Home({ results }) {
 // 그 데이터는 컴포넌트의 props 로 받게 된다. ( Custom App 의 pageProps 가 전달하게 된다. )
 export async function getServerSideProps() {
   const { results } = await (
-    await fetch(`http://localhost:3004/api/movies`)
+    await fetch(`http://localhost:3006/api/movies`)
   ).json()
 
   return {
